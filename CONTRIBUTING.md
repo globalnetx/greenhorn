@@ -13,10 +13,10 @@ it went sideways is worth more than a paragraph about it. Scrub anything
 private first.
 
 **Ideas and bigger changes.** Open an issue before you write the code or
-the prose, so we can talk about the shape. We read everything, and we
-can't promise every suggestion makes it in: Greenhorn stays small on
-purpose, and some good ideas belong in a company's own folder rather
-than in the tool. When we say no, we'll say why.
+the prose, so the shape can be talked through first. We do our best to
+read what comes in. We can't promise a reply, a timeline, or that a
+suggestion makes it in: Greenhorn stays small on purpose, and some good
+ideas belong in a company's own folder rather than in the tool.
 
 **Bugs and typos.** Small fixes are welcome as pull requests any time.
 Read the skill's [`conventions.md`](skills/greenhorn/references/conventions.md)
@@ -43,6 +43,10 @@ contributions made that way are welcome. Read what your assistant wrote
 before you send it, run the checks, and have a second reader, human or
 AI, go over a change to the skill; that habit catches more than we like
 to admit.
+
+**Security problems.** Not in a public issue, please. Use "Report a
+vulnerability" under the repository's
+[Security tab](https://github.com/globalnetx/greenhorn/security).
 
 **Licence.** By contributing you agree your contribution is licensed under
 the repository's Apache 2.0 licence.

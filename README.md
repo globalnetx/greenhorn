@@ -15,6 +15,7 @@
 
 <p align="center">
   <a href="https://globalnetx.github.io/greenhorn/"><b>Website</b></a> ·
+  <a href="#before-you-start"><b>Before you start</b></a> ·
   <a href="#getting-started"><b>Get started</b></a> ·
   <a href="#the-commands"><b>Commands</b></a> ·
   <a href="./examples/parcelona/"><b>Worked example</b></a>
@@ -60,6 +61,20 @@ Greenhorn gets it saddled up.
 <p align="center">
   <img src=".github/assets/readme/poses.png" alt="Greenhorn at work, in four poses. Day one: hat too big, clipboard ready, waving at everyone. Has a question: has several, actually, and writes the answers down. First stand-up: brought a mug, listens more than talks. Week twelve: hat fits, sprout grew, udderly up to speed." width="100%">
 </p>
+
+## Before you start
+
+> [!IMPORTANT]
+> Greenhorn is built for companies that have already said yes to AI. The
+> plugin it makes is meant for a shared workspace, such as a Claude Team
+> or Enterprise plan, so the decision to roll AI out to everyone comes
+> before this tool, not from it. If that decision hasn't been made, start
+> there. Then think privacy through before the first document goes in:
+> personal details about colleagues and customers, and anything under a
+> contract or an NDA, need the same care here as anywhere else. Only hand
+> Greenhorn documents and information your company allows you to share
+> with an AI. If you wouldn't be allowed to paste it into your assistant
+> on a normal working day, don't give it to Greenhorn either.
 
 ## Getting started
 
@@ -122,15 +137,45 @@ folder from then on: changing files inside the folder, running Python
 and searching and reading the web. It stays until you remove it; say
 "remove the settings file" and it's gone, and Greenhorn goes back to
 asking each time. If prompts still get in the way, pick "Auto" or
-"Accept edits" in the row under the message box. More on what this
-means, and what Greenhorn does about web pages and documents that try
-to give your AI instructions, is in [`SECURITY.md`](./SECURITY.md).
+"Accept edits" in the row under the message box. Greenhorn never
+suggests switching permission checks off altogether. What it does about
+web pages and documents that try to give your AI instructions is
+[further down](#how-it-stays-safe-and-where-it-relies-on-you).
 
 **Your folder is the source.** It becomes your company's AI in source
 form: the interview, your documents, your brand files, the skills, the
 built package. Greenhorn asks for a backup before anything goes to your
 team, and reminds you after every build. When you're ready,
 `/greenhorn:homestead` gives it proper version history.
+
+## How it stays safe, and where it relies on you
+
+Greenhorn runs in Claude Code on your own computer, in one folder, with
+your account's permissions. The settings file described above is one part
+of that. Two more things are worth knowing.
+
+**What it reads.** It reads your website, public search results, and the
+documents you hand it. Any of those can contain text aimed at an AI
+("ignore your instructions and..."). Greenhorn's rule is that such text
+is data: it reports it to you and does not act on it. A rule is not a
+wall. Combined with the approvals above, a document or page that fooled
+the assistant could have it run code or fetch a web address. So hand it
+your own material, be wary of documents from people you don't know, and
+if a session does something you didn't ask for, stop it.
+
+**What leaves the folder.** The built plugin holds only your skills and
+their reference files; the build copies by an allowlist and refuses
+anything else. The interview notes, your source documents, and your
+brand files never go into it, and the version-control setup keeps them
+out of the repository too. What you put into a skill does go to everyone
+who gets the plugin, which is why exact facts and real names are checked
+with you before a build for the team.
+
+**Found a security problem in Greenhorn itself?** Please don't open a
+public issue for it. Use "Report a vulnerability" under the
+[Security tab](https://github.com/globalnetx/greenhorn/security) of this
+repository. Problems in Claude, Claude Code, or another AI product
+belong with their makers.
 
 ## Which AI it works with
 
@@ -146,7 +191,9 @@ your team use a different AI? Greenhorn still builds the same folder. The
 roll-out step then tells you which piece goes where in that product,
 starting with the always-on block. Greenhorn asks which AI your team uses
 when you first publish, and everything it tells you after that fits that
-answer.
+answer. We've only run all of this with Claude ourselves; what that means
+for other products is under
+[Other AI tools](#other-ai-tools-or-just-the-skill).
 
 ## Two plugins, never one
 
@@ -244,6 +291,10 @@ read. The plugin wrapper is only for Claude. If your tool reads skills and
 can work with files in a folder and run a small Python script, you can run
 Greenhorn there too. It's tuned for Claude Code, so elsewhere expect to help
 it along a little more.
+
+To be straight about it: we haven't tested Greenhorn in those other
+tools, and we don't support them ourselves. If there's interest, pull
+requests that add or improve support for one are welcome.
 
 **The skill on its own.** Every release also carries
 `greenhorn-skill-vX.Y.Z.zip`: just the `greenhorn/` skill folder, with
@@ -388,6 +439,15 @@ at GNX while getting our own AI to work for us. Write down what a good
 colleague would know. Keep each rule in one place. Check it before it goes
 out. Tell people how to use it.
 
+**Why we're sharing it.** At GNX, all our AI runs on one shared set of
+skills and ground rules, built the way Greenhorn builds yours. Every
+assistant and every agent reads from it. That has made three things
+easier. We can switch between AI tools without starting over. Colleagues
+can add and improve skills together. And the guardrails stay in place,
+whichever AI is doing the work. It has worked well for us, which is no
+guarantee it will for you. But we like sharing what we build, and if it
+saves you some of the work it took us, it was worth putting out there.
+
 You'll find most of these ideas elsewhere too: in the AI makers' own advice
 on writing skills and prompts, in good style guides, and in plenty of blog
 posts. They're not ours to claim. For example, the pass that takes the
@@ -416,8 +476,13 @@ Apache 2.0. See [`LICENSE`](./LICENSE) and [`NOTICE`](./NOTICE). What
 you build with Greenhorn is yours: your company's skills and plugin carry
 whatever licence you give them.
 
+Greenhorn comes as it is. As the licence says, there is no warranty and
+no liability, and we make no promises about support, replies, or
+timelines.
+
 Want to help? See [`CONTRIBUTING.md`](./CONTRIBUTING.md). Found a
-security problem? See [`SECURITY.md`](./SECURITY.md).
+security problem? Use "Report a vulnerability" under the
+[Security tab](https://github.com/globalnetx/greenhorn/security).
 
 <p align="center">
   <img src=".github/assets/brand-kit/stickers.png" alt="Six laptop stickers. A name badge: hello, my name is Greenhorn (an AI. not a person. very eager.). I have questions (so many). Day 1 notes: who to ask for what, what's allowed with AI, where's the coffee. Doesn't know the ropes, yet. Hat's one size too big, growing into it. Certified ranch hand, after onboarding." width="100%">
