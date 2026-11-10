@@ -230,7 +230,7 @@ nothing after it (`/greenhorn:greenhorn`) and it prints this list for you.
 | `/greenhorn:round-up` | Checks the folder: broken pointers, overlapping skills, stale references, claims with no source. Also runs before every build. | "check everything", "anything stale?" |
 | `/greenhorn:roll-out` | Packs everything up for your team's AI (a plugin, for Claude) and tells you exactly how to get it to them. | "publish this", "push it to the team" |
 | `/greenhorn:campfire` | Tells your team about their new colleague, in the form you want: an email, a post in your channel, a short note, or a handout. In your voice, with your own examples, and a named person to ask. | "make the onboarding guide", "announce it to the team" |
-| `/greenhorn:homestead` | Optional, for later. Puts the folder under version control so a colleague can help maintain it. | "put this on GitHub" |
+| `/greenhorn:homestead` | Optional, for later. Puts the folder under version control, in a private repository, so a colleague can help maintain it. | "put this on GitHub" |
 
 The first run uses the other commands as it goes. Your AI names them
 when a session wraps up, so you know they're there for later.
@@ -403,7 +403,7 @@ For the curious, and for anyone who'd rather build Greenhorn themselves.
 | `skills/greenhorn/scripts/scan_secrets.py` | Fails on anything that looks like a password, token, or key. |
 | `skills/greenhorn/scripts/stamp_org_instructions.py` | Re-stamps the always-on block after a person has reviewed it. |
 | `skills/greenhorn/scripts/build_plugin.py` | Packs your company's plugin: runs the checks, copies only your skills and a manifest, raises the version, zips it, and prints where the always-on block goes. |
-| `skills/greenhorn/scripts/init_repo.py` | Puts your folder under version control: the ignore list that keeps the interview and your documents out, a licence note, the checks under `tools/` with a workflow that runs them, and the first commit. |
+| `skills/greenhorn/scripts/init_repo.py` | Puts your folder under version control: the ignore list that keeps the interview and your documents out, a licence note, the checks under `tools/` with a workflow that runs them and fails when the repository is public, and the first commit. It never publishes anything itself. |
 | `CONVENTIONS.md`, `SCHEMA.md` | Two-line pointers to the files above, for anyone who looks for them at the top. |
 | `commands/` | One small file per command, so they show up in the slash menu. Each one opens the skill at the right procedure. |
 | `examples/parcelona/` | A complete worked example for a made-up freight forwarder, Parcelona Logistics: what Greenhorn builds for a company, its staff handout as source and PDF, and the checker's test case. |

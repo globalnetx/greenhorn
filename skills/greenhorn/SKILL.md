@@ -55,7 +55,7 @@ never has to remember a name: match what they say to a mode and run it.
 | `/greenhorn:round-up` | Checks the folder and reports in plain words: broken pointers, overlapping skills, stale references, claims with no source. Runs before every build. | "check the harness", "anything stale?" |
 | `/greenhorn:roll-out` | Packs the company plugin and says exactly how to get it to the team. | "publish", "rebuild the plugin" |
 | `/greenhorn:campfire` | Tells the team about their new colleague, in the form the admin wants: an email, a post in the channel, a short note, or a handout. In the company's voice, with its own examples, and a named person to ask. | "make the onboarding guide", "announce it to the team" |
-| `/greenhorn:homestead` | Optional, for later. Puts the folder under version control so a colleague can help maintain it. | "put this on GitHub" |
+| `/greenhorn:homestead` | Optional, for later. Puts the folder under version control, in a private repository, so a colleague can help maintain it. | "put this on GitHub" |
 
 The first run is the interview plus the other commands as they become
 useful; the admin hears what the others do when giddy-up closes a
@@ -324,7 +324,8 @@ python3 "${CLAUDE_SKILL_DIR}/scripts/init_repo.py" --dry-run .
 - `scripts/init_repo.py` puts the folder under version control: the
   ignore list that keeps the profile and the sources out, a licence
   note, copies of the two checks under `tools/` with the workflow that
-  runs them on every change, then the first commit on `main`. Only
+  runs them on every change and fails when the repository is public,
+  then the first commit on `main`. It never publishes anything. Only
   homestead runs it, `--dry-run` first.
 
 Exit code 0 means clean. Read the output and explain it in plain words;

@@ -23,7 +23,8 @@ on GitHub, with the second maintainer invited, and a short addition to
 the folder's house rules.
 
 This reference is advice from someone who has set up a dozen of these,
-not a manual. The admin hears the arguments, picks a route, and is
+not a manual, with one exception: the repository is private, and that is
+a rule. The admin hears the arguments, picks a route, and is
 walked through it one step at a time.
 
 ## When to suggest it
@@ -45,8 +46,8 @@ What it gives this folder: a history of every change, with who made it
 and why, in their own words; a way back to any earlier version; a second
 maintainer working on the same folder without overwriting the first;
 the checks running on every change, so a broken skill is caught before
-it is published; and the public-or-private choice made once, at the
-start, and then kept.
+it is published; and one private home for it on GitHub, set at the
+start and meant to stay that way.
 
 What it costs: a little ceremony per change (a message, a button), and
 a few new words. And one honest caveat: a repository is not a backup by
@@ -78,6 +79,67 @@ profile's Operations section, in one line:
   harness-profile.md, sources/, and brand-sources/ stay out. [you said]
 ```
 
+## Private, and nothing else
+
+The repository for this folder is private. This is a rule, not a
+recommendation, and the one thing in this reference the admin is not
+offered a choice about. The ignore list keeps the interview and the
+documents out, but the skills still describe how the company works: its
+customers, its processes, who decides what.
+
+- **Never offer public.** No question, card, or summary lists "public"
+  as an option, and no step makes or publishes a repository without
+  saying private first.
+- **Never make or help make a public one.** Greenhorn does not run, type
+  out, or dictate a `gh repo create` that lacks `--private`, never
+  passes `--public`, never changes a repository's visibility to public,
+  and never walks the admin through unticking "Keep this code private"
+  or through GitHub's visibility setting in that direction. If the admin
+  asks for a public repository, say why not in two sentences and carry
+  on with a private one. Do not point them to where it could be done
+  instead. If they ask what would happen: the checks on GitHub fail on
+  every push while it is public, so nothing else gets checked.
+- **Read it back; do not trust the tick.** After publishing, by either
+  route, the visibility is read back before anything else happens: no
+  invitation, no house-rules commit, no further push until it reads
+  private ("Checking it is private", below).
+- **Only push to a repository made here, private, or checked first.**
+  Before the first push to any repository this session did not just
+  create with `--private`, or publish with the private box ticked, read
+  its visibility. That covers a folder that already has a remote (the
+  script names every remote it finds, in a refusal as well as in a
+  note), a folder that sits inside another repository, and a
+  `gh repo create` that failed because the name was taken: do not add a
+  remote by hand and push to whatever is there. Public means stop.
+- **If the one just published turns out public: fix, then look.** A
+  repository this session published moments ago is made private at once
+  ("Checking it is private"). Then tell the admin plainly that it was
+  public and for roughly how long, and ask whether anything in the
+  skills needs a second look. Treat what was in it as seen.
+- **If one that existed before is public: stop and ask.** Push nothing
+  and change nothing. It may be public on purpose, for something else,
+  and making it private has consequences that GitHub lists itself. Tell
+  the admin what was found, and let them choose between making that one
+  private and a fresh private repository for this folder. If the script
+  said files from this folder are already tracked in it, say that they
+  have been public for as long as it has.
+- **If it cannot be changed** (no rights on it, or the organisation
+  keeps that setting for its owners): the admin asks an owner now, and
+  nothing else happens until it reads private.
+- **"Internal" is not private.** Some company organisations on GitHub
+  offer a third visibility, internal, which lets everyone in the
+  company's GitHub organisations read the repository. Pick private. If
+  the admin asks for internal by name, that is their call: say who can
+  then read it, create the repository private as below, let them change
+  it to internal in GitHub's settings, and write "internal" wherever
+  the profile line and the house rules say "private". An internal
+  reading nobody asked for is treated like a public one.
+- **The checks on GitHub are the backstop, not the gate.** The workflow
+  the script writes fails when the repository is public, so the commit
+  goes red and GitHub emails whoever pushed. It runs on a push or a pull
+  request, not by itself, and it lets internal through; that is why the
+  read-back comes first.
+
 ## Choosing a route
 
 Offer two, with the question tool, and recommend by who the admin is.
@@ -90,11 +152,9 @@ brings those its own way.
 - **git and the gh command line.** For an admin who is comfortable in a
   terminal, or whose developer colleague is. Fewer clicks, same result.
 
-Before either, the sane choices, said once as the recommendation and
-not as a lecture:
+Before either, the choices. Private is the rule above. The rest are
+recommendations, said once and not as a lecture:
 
-- **Private.** Always, for this folder. The ignore list keeps the worst
-  out, but the skills still describe how the company works.
 - **Owned by the company**, not by a person. If the company has a GitHub
   organisation, the repository goes there. If not, a company-controlled
   account (one IT or the company itself owns) rather than the admin's
@@ -128,7 +188,8 @@ not as a lecture:
    company's name, a NOTICE crediting Greenhorn's Apache-licensed
    templates (the company's own skills stay the company's), copies of
    the checker and the secret scanner under `tools/`, and the workflow
-   that runs them. Then the first commit, of everything the ignore list
+   that runs them, and fails first when the repository is public. Then
+   the first commit, of everything the ignore list
    allows. No repository exists on GitHub after this; that comes with
    the rest of the chosen route.
 3. **Dry run first.** From the company folder, with the skill folder's
@@ -147,7 +208,10 @@ not as a lecture:
    folder back as it was and says so.
    The ones that need the admin: git is missing or has no name and
    email yet (step 1 was skipped; go back to it), or the folder is
-   already a repository or sits inside one.
+   already a repository or sits inside one. In both of those cases the
+   script names every remote it finds, in the refusal itself: read that
+   repository's visibility ("Checking it is private") before running
+   anything further, with `--force` or without.
 4. **Run it** without `--dry-run`, with `--include` for any sensitive
    file the admin decided to commit, and `--owner` when the licence
    note should carry a name other than `plugin-author` from
@@ -164,7 +228,8 @@ not as a lecture:
 The script is route-neutral: it prepares the folder, and both routes
 below continue from the folder it leaves. Running it again later, with
 `--force`, refreshes the copies under `tools/` and the workflow after a
-Greenhorn update and adds any line missing from the ignore list;
+Greenhorn update (which is how a folder set up earlier gets the check
+for a public repository) and adds any line missing from the ignore list;
 `LICENSE` and `NOTICE` are left as they are (a company that re-licensed
 its folder keeps that; `--replace-licence` writes the defaults again on
 purpose). A line the admin removed from the ignore list to commit a
@@ -183,7 +248,7 @@ Windows labels differ in capitalisation only.
    macOS" or "Download for Windows"; it needs macOS 12.0 or later, or
    Windows 10 64-bit or later. Open it and sign in to GitHub.com from
    its first screen, with the account the repository should be made
-   under (the sane choices above). Signing in also tells git the
+   under (the choices above). Signing in also tells git the
    admin's name and email, which the script needs for the first commit
    (known from use; the facts section says so), which is why this step
    comes before the script runs.
@@ -198,16 +263,14 @@ Windows labels differ in capitalisation only.
    prefilled from the folder; give it a one-line description; make sure
    **"Keep this code private" is ticked**; if an "Organization"
    drop-down shows, pick the company's organisation rather than the
-   admin's own account; then click "Publish Repository". The
-   documentation does not say whether the private box is ticked by
-   default, so look at it every time rather than assume.
-4. **Check it is private.** Open the repository on GitHub.com (in
-   Desktop, "Repository", then "View on GitHub"). The word "Private"
-   sits next to the repository name at the top of the page. If it says
-   "Public", stop and change it under "Settings", at the bottom of the
-   General page, under "Danger Zone", "Change repository visibility".
-5. **Invite the second maintainer.** On the repository page on
-   GitHub.com: the "Settings" tab, then in the "Access" section of the
+   admin's own account. Ask the admin to say that the box is ticked
+   before they click "Publish Repository"; the documentation does not
+   say whether it is ticked by default, so it is looked at every time.
+4. **Check it is private**, before anything else ("Checking it is
+   private", below). Nobody is invited and nothing more is pushed until
+   it reads private.
+5. **Invite the second maintainer**, once step 4 reads private. On the
+   repository page on GitHub.com: the "Settings" tab, then in the "Access" section of the
    sidebar, "Collaborators & teams". Under "Manage access", "Add
    people", search for the colleague's GitHub username or email, pick
    the role "Write" under "Choose a role", and click the "Add ... to
@@ -269,8 +332,11 @@ gh repo create <organisation-or-account>/<company>-ai --private --source=. --rem
 ```
 
 Run from the company folder. `--private` is the one flag that must not
-be forgotten; `--source=.` uses the existing folder rather than making
-a new one; `--push` sends the first commit up. Then invite the second
+be forgotten, so this command is always given whole, never shortened and
+never retyped from memory; `--source=.` uses the existing folder rather
+than making a new one; `--push` sends the first commit up. Straight
+after it, read the visibility back ("Checking it is private", below).
+Only when it reads private, invite the second
 maintainer on the repository's Collaborators page on GitHub.com (route
 one, step 5), or in one line:
 
@@ -285,12 +351,50 @@ profile or the sources, and if it ever does, stop and look at
 `.gitignore` before adding anything.
 
 The pitfalls, named once: `git add -A` after someone deleted a line
-from `.gitignore` commits the profile; `gh repo create` without
-`--private` makes a public repository, and the skills are the company's
-inner workings; a repository created under a personal account belongs to
+from `.gitignore` commits the profile; a `gh repo create` given
+`--public`, or run without flags and answered wrongly, makes a public
+repository, and the skills are the company's inner workings; a repository created under a personal account belongs to
 that person's GitHub account, and moving it later is a chore; `git push
 --force` rewrites history the other maintainer has, so it is never used
 here.
+
+## Checking it is private
+
+Done straight after publishing, on either route, and before the first
+push to any repository this session did not make.
+
+With gh (route two, or route one when gh happens to be installed and
+signed in), from the company folder and with no repository name, so
+that it reads the repository the folder actually points at:
+
+```bash
+gh repo view --json nameWithOwner,visibility
+```
+
+It prints the owner and name, and `PRIVATE`, `PUBLIC`, or `INTERNAL`.
+Read both back to the admin. The name must be the repository they
+meant, under the account or organisation they meant, and the visibility
+must be `PRIVATE` (or `INTERNAL`, when they asked for that by name). An
+error, or no output, is not a pass; use the next way.
+
+Without gh, the admin opens the repository on GitHub.com (in Desktop,
+"Repository", then "View on GitHub") and reads out the name at the top
+of the page and the word next to it. Ask for the word, "Private",
+"Public", or "Internal"; do not ask "is it private?", which invites a
+yes.
+
+If the repository just published here reads anything other than what
+was chosen, fix it before anything else. With gh, from the company
+folder:
+
+```bash
+gh repo edit --visibility private --accept-visibility-change-consequences
+```
+
+On GitHub.com: "Settings", at the bottom of the General page, under
+"Danger Zone", "Change repository visibility". Then read it back again.
+For a repository that existed before this session, run neither; "If one
+that existed before is public", in "Private, and nothing else", applies.
 
 ## What changes in the house rules
 
@@ -304,6 +408,8 @@ names in place of the brackets:
 This folder is a private repository at [where]. [Maintainer] and
 [maintainer] push to it.
 
+- The repository stays private. Nobody changes its visibility; if it
+  is ever public, the next push fails the checks on GitHub.
 - Commit after the two checks pass, never before; the same checks run
   on GitHub and mark the commit red when one fails.
 - One change per commit, with what changed and why in the message, in
@@ -380,11 +486,32 @@ have collaborators; the word "Private" or "Public" appears next to the
 repository name, and visibility changes under "Settings", "General",
 "Danger Zone", "Change repository visibility".
 
+The script's workflow asks GitHub for the visibility with
+`gh api "repos/$GITHUB_REPOSITORY" --jq .visibility`, which answers
+`public`, `private`, or `internal` in lower case, using the token every
+run is given. Known from use, 2026-11-10: gh is installed on GitHub's
+own runners; that token can always read its own repository's details;
+re-running a workflow run reuses the event it was triggered with, which
+is why the workflow asks instead of going by the event, and falls back
+to the event's `repository.private` (true for private and internal,
+false for public) only when the question gets no clear answer. The
+workflow step has been run locally against a stand-in for gh, not yet
+on GitHub.
+
+The gh command line, from its own help (`gh repo view --help`,
+`gh repo edit --help`, gh 2.97.0, read 2026-11-10): both take the
+repository as an optional argument and use the current folder's
+repository without it; `gh repo view` takes `--json` with the fields
+`nameWithOwner` and `visibility`; `gh repo edit` takes `--visibility`
+with public, private, or internal, and requires
+`--accept-visibility-change-consequences` with it. Known from use: the
+`visibility` field of `gh repo view` prints in capitals.
+
 ## What the admin sees
 
 The two-sentence explanation and the arguments; the list of what stays
 out, for their yes; the route choice with a recommendation, and that
 route's install and sign-in; the script's dry run read back, then its
-result; and then one step at a time,
-with the check at the end that the repository says "Private" and the
-colleague has accepted.
+result; and then one step at a time, with the visibility read back as
+private before anyone is invited, and the colleague's acceptance at the
+end.

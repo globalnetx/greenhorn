@@ -12,7 +12,8 @@ brand sources, built zips, local notes), a LICENSE note that defaults to
 "proprietary, internal use only", a NOTICE crediting Greenhorn's
 Apache-licensed templates, copies of Greenhorn's checker and secret
 scanner under `tools/`, and a GitHub Actions workflow that runs both on
-every push and pull request. Then it runs `git init` on a branch called
+every push and pull request and stops, before either, when the
+repository is public. Then it runs `git init` on a branch called
 `main` and makes one first commit of everything the ignore list allows.
 
 It refuses, writing nothing, when the folder is not a Greenhorn folder
@@ -199,6 +200,34 @@ def _owner_from_skills(root: Path) -> Optional[str]:
     return None
 
 
+def _remotes(root: Path) -> list:
+    """Every distinct remote address of the repository `root` is in (fetch
+    and push), without any sign-in details in it."""
+    found: list = []
+    for line in _run_git(["remote", "-v"], root).stdout.splitlines():
+        parts = line.split()
+        if len(parts) < 2:
+            continue
+        address = re.sub(r"//[^/]*@", "//", parts[1])
+        if address not in found:
+            found.append(address)
+    return found
+
+
+def _remote_words(remotes: list) -> str:
+    """One sentence about the remotes, or '' when there are none."""
+    if not remotes:
+        return ""
+    return (" It already has a remote (" + ", ".join(remotes) + "): before anything is pushed there, read that repository's visibility, "
+            "and stop if it is public (the homestead reference, \"Private, and nothing else\").")
+
+
+def _tracked_under(root: Path) -> int:
+    """How many files under `root` the enclosing repository already tracks."""
+    r = _run_git(["ls-files", "--", "."], root)
+    return len([line for line in r.stdout.splitlines() if line.strip()]) if r.returncode == 0 else 0
+
+
 def look(root: Path, plan: Plan, force: bool) -> None:
     """Every refusal, before anything is written."""
     if not root.is_dir():
@@ -218,16 +247,22 @@ def look(root: Path, plan: Plan, force: bool) -> None:
     if (root / ".git").exists():
         if force:
             plan.note(root / ".git", "already a repository; carrying on because of --force. The files are written or refreshed, and the first commit is skipped if there is history already")
+            if _remotes(root):
+                plan.note(root / ".git", "this repository is not new." + _remote_words(_remotes(root)))
         else:
-            plan.refuse(root / ".git", "this folder is already a repository. Nothing was changed. Run with --force to refresh the ignore list, the copies under tools/, and the workflow inside it; LICENSE and NOTICE stay as they are unless --replace-licence is given too")
+            plan.refuse(root / ".git", "this folder is already a repository." + _remote_words(_remotes(root)) + " Nothing was changed. Run with --force to refresh the ignore list, the copies under tools/, and the workflow inside it; LICENSE and NOTICE stay as they are unless --replace-licence is given too")
             return
     else:
         parent = _inside_repository(root)
         if parent is not None:
+            tracked = _tracked_under(root)
+            outer = _remote_words(_remotes(root)).replace("It already has", "That repository has")
+            if tracked:
+                outer += f" {tracked} of this folder's files are already tracked in it, so they are wherever it has been pushed; if that place is public, treat them as seen."
             if force:
-                plan.note(root, f"this folder sits inside the repository at {parent}; carrying on because of --force, as its own nested repository")
+                plan.note(root, f"this folder sits inside the repository at {parent}; carrying on because of --force, as its own nested repository.{outer}")
             else:
-                plan.refuse(root, f"this folder sits inside a repository already, the one at {parent}. A repository inside a repository is rarely what you want; move the folder out, or run with --force to make it its own")
+                plan.refuse(root, f"this folder sits inside a repository already, the one at {parent}.{outer} A repository inside a repository is rarely what you want; move the folder out, or run with --force to make it its own")
                 return
     if not _git_identity_known(root):
         plan.refuse(None, "git does not know your name and email yet, so it cannot make the first commit. Sign in to GitHub Desktop once, which sets them, or run `git config --global user.name \"Your Name\"` and `git config --global user.email \"you@example.com\"`. Then run this again")
@@ -361,6 +396,11 @@ def workflow_text() -> str:
 # scanner on every push and pull request, from the copies under tools/.
 # A red cross on a commit means one of them found something; open the
 # run under the Actions tab to read it in plain words, with file and line.
+#
+# The first step fails when this repository is public. The skills
+# describe how the company works, so it must not be; this is the backstop
+# for a repository published the wrong way by accident. It runs on a push
+# or a pull request, not by itself.
 
 name: Checks
 
@@ -376,6 +416,23 @@ jobs:
     name: Check the skills and scan for secrets
     runs-on: ubuntu-latest
     steps:
+      - name: Stop if this repository is public
+        env:
+          GH_TOKEN: ${{{{ github.token }}}}
+          WAS_PRIVATE: ${{{{ github.event.repository.private }}}}
+        run: |
+          # Ask GitHub what the visibility is now. If that gets no clear
+          # answer, go by what it was when this run was triggered.
+          visibility="$(gh api "repos/$GITHUB_REPOSITORY" --jq .visibility 2>/dev/null || true)"
+          case "$visibility" in
+            public|private|internal) ;;
+            *) if [ "$WAS_PRIVATE" = "true" ]; then visibility="private"; else visibility="public"; fi ;;
+          esac
+          if [ "$visibility" = "public" ]; then
+            echo "::error::This repository is public. It holds how the company works, so it must not be. Make it private now: Settings, General, Danger Zone, Change repository visibility. Then re-run this check."
+            exit 1
+          fi
+          echo "Visibility: $visibility."
       - uses: {ACTION_CHECKOUT}
       - uses: {ACTION_SETUP_PYTHON}
         with:
@@ -483,7 +540,7 @@ def prepare(root: Path, plan: Plan, owner: Optional[str], includes: list, force:
     wf = root / WORKFLOW_PATH
     wf_rel = WORKFLOW_PATH.as_posix()
     if wf.is_file() and MARKER not in wf.read_text(encoding="utf-8", errors="replace") and not force:
-        plan.kept.append((wf_rel, "a workflow that is not ours; left as it is (--force replaces it)"))
+        plan.kept.append((wf_rel, "a workflow that is not ours; left as it is (--force replaces it). Until then nothing on GitHub checks the skills, or that the repository is not public"))
     else:
         files[wf_rel] = workflow_text()
         plan.writes.append((wf_rel, "runs the checker and the secret scanner on every push and pull request"))
@@ -640,7 +697,7 @@ def render(plan: Plan) -> None:
     if plan.left_out:
         print(f"Kept out of the commit ({len(plan.left_out)} files): " + ", ".join(plan.left_out[:8]) + (" ..." if len(plan.left_out) > 8 else ""))
     print()
-    print("Next: GitHub Desktop (File, Add Local Repository, then Publish repository with \"Keep this code private\" ticked), or the command line. The homestead reference walks through both.")
+    print("Next: GitHub Desktop (File, Add Local Repository, then Publish repository with \"Keep this code private\" ticked), or the command line. Private, always: the homestead reference walks through both routes and reads the visibility back before anyone is invited.")
 
 
 # --- Self-test ----------------------------------------------------------------------
@@ -750,6 +807,8 @@ def self_test() -> int:
             case("scanner copy is runnable", subprocess.run([sys.executable, "-I", str(real / "tools" / "scan_secrets.py")], cwd=str(real), capture_output=True, text=True).returncode == 0, "scanner failed on the test folder")
             wf = (real / WORKFLOW_PATH).read_text(encoding="utf-8-sig")
             case("workflow runs both checks strictly", "tools/check_harness.py --strict" in wf and "tools/scan_secrets.py" in wf and "pull_request:" in wf and "push:" in wf, wf)
+            gate, checkout = wf.find("WAS_PRIVATE: ${{ github.event.repository.private }}"), wf.find("actions/checkout@")
+            case("workflow stops first when the repository is public", 0 < gate < checkout and 'gh api "repos/$GITHUB_REPOSITORY" --jq .visibility' in wf and "GH_TOKEN: ${{ github.token }}" in wf and 'if [ "$visibility" = "public" ]; then' in wf and "exit 1" in wf, wf)
             log = _run_git(["log", "--oneline"], real).stdout.strip().splitlines()
             case("exactly one commit", len(log) == 1, str(log))
             case("working tree clean", _run_git(["status", "--porcelain"], real).stdout.strip() == "")
@@ -766,12 +825,30 @@ def self_test() -> int:
             p = run(real, force=True, replace_licence=True)
             case("replace-licence writes the default again", p.ok and "All rights reserved" in (real / "LICENSE").read_text(encoding="utf-8-sig"), str(p.refusals))
             case("force makes no second first commit", len(_run_git(["log", "--oneline"], real).stdout.strip().splitlines()) == 1 and any("commits already" in m for _, m in p.notes), str(p.notes))
+            case("no remote, no remote note", not any("already has a remote" in m for _, m in p.notes), str(p.notes))
+            signed_in = "https://" + "someone" + ":" + "sign-in@detail" + "@" + "example.invalid/acme/acme-ai.git"
+            _run_git(["remote", "add", "origin", signed_in], real)
+            _run_git(["remote", "add", "backup", "git@example.invalid:acme/backup.git"], real)
+            p = run(real, dry_run=True, force=True)
+            case("existing remotes are all named, for the private check", any("https://example.invalid/acme/acme-ai.git" in m and "git@example.invalid:acme/backup.git" in m and "visibility" in m for _, m in p.notes), str(p.notes))
+            case("the remote note carries no sign-in details", not any("detail" in m or "someone" in m for _, m in p.notes), str(p.notes))
+            p = run(real, dry_run=True)
+            case("the plain refusal names the remotes too", not p.ok and any("already a repository" in m and "https://example.invalid/acme/acme-ai.git" in m for _, m in p.refusals), str(p.refusals))
+            _run_git(["remote", "remove", "backup"], real)
+            _run_git(["remote", "remove", "origin"], real)
 
             # 6. Inside a parent repository: refused without --force.
             nested = real / "nested"
             _make_folder(nested)
             p = run(nested)
             case("nested folder refused", not p.ok and any("inside a repository" in m for _, m in p.refusals), str(p.refusals))
+            case("untracked nested folder says nothing about tracked files", not any("already tracked" in m for _, m in p.refusals), str(p.refusals))
+            _run_git(["remote", "add", "origin", "https://example.invalid/acme/website.git"], real)
+            _run_git(["add", "nested"], real)
+            p = run(nested)
+            case("nested folder names the outer remote and the tracked files", not p.ok and any("https://example.invalid/acme/website.git" in m and "already tracked" in m for _, m in p.refusals), str(p.refusals))
+            _run_git(["rm", "-r", "-q", "--cached", "nested"], real)
+            _run_git(["remote", "remove", "origin"], real)
 
             # 7. An existing .gitignore is merged, not replaced.
             merged = base / "merged"

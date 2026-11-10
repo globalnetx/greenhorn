@@ -71,6 +71,8 @@ repository, so the names below are the example's.
 This folder is a private repository at the company's GitHub
 organisation. Ana Costa and Lena Hoffmann push to it.
 
+- The repository stays private. Nobody changes its visibility; if it
+  is ever public, the next push fails the checks on GitHub.
 - Commit after the two checks pass, never before; the same checks run
   on GitHub and mark the commit red when one fails.
 - One change per commit, with what changed and why in the message, in

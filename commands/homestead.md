@@ -1,5 +1,5 @@
 ---
-description: "Optional, for later. Puts the folder under version control so a colleague can help maintain it."
+description: "Optional, for later. Puts the folder under version control, in a private repository, so a colleague can help maintain it."
 allowed-tools: Read Edit Grep Glob WebFetch WebSearch Bash(python3 *) Bash(py *) Bash(python *) Bash(mkdir *)
 ---
 
