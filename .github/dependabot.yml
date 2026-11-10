@@ -1,0 +1,10 @@
+version: 2
+updates:
+  # Keeps the pinned action SHAs current; one PR a week at most.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns: ["*"]

@@ -1,0 +1,27 @@
+# The company's most sensitive files. They are never built into a plugin
+# and stay on this machine unless a maintainer commits them deliberately
+# after a scrub (see CONVENTIONS.md, "The folder").
+harness-profile.md
+sources/
+brand-sources/
+
+# Built plugin zips
+dist/
+*.zip
+
+# Local notes that stay on this machine
+local/
+*.local.md
+
+# Python
+__pycache__/
+*.pyc
+
+# macOS
+.DS_Store
+
+# Claude Code local working directory
+.claude/
+
+# The worked examples ship a fictional, scrubbed profile on purpose.
+!examples/*/harness-profile.md

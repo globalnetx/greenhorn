@@ -1,0 +1,63 @@
+---
+name: skill-name-in-kebab-case
+description: "Use this skill when [the trigger, in the words a colleague would use]. Covers [what it does and the scope it handles]. Trigger especially for [concrete phrases or situations]. Do NOT use for [adjacent things], which live in [sibling-skill]."
+# Only name, description, license, compatibility, metadata, and allowed-tools
+# may appear at the top level; the plugin upload rejects anything else.
+# Everything Greenhorn tracks lives one level down, under metadata.
+# See references/schema.md in the Greenhorn skill for the full contract.
+metadata:
+  version: 0.1.0
+  audience: internal          # internal (default) | public | restricted
+  # tags: "topic, topic"       # a few words for search; keep sparse
+  # language: en               # instructions first, then content languages: "en, nl"
+  # role: conduct              # only on the one skill that owns the rules
+  # Lifecycle, only when retiring or replacing:
+  # deprecated: "reason this skill is being retired"
+  # replaced-by: successor-skill-name
+# license: Apache-2.0          # when the skill carries licensed material
+# compatibility: "Needs the ticketing connector"   # when it needs something to run
+---
+
+# Skill Name
+
+One paragraph on what this skill is for, written for a person. Same scope as
+the description, but as prose rather than a trigger. Address whoever is
+reading ("you"); never a named person or a department. Roles only where a
+role changes what to do.
+
+## When to use this skill
+
+Concrete situations and phrasings that should open this skill. Keep this in
+step with the description; the description is what the assistant reads to
+decide, this section is what a person reads to understand.
+
+## When NOT to use this skill
+
+Every exclusion names where the thing lives instead.
+
+- Adjacent task A: use [sibling-skill] instead
+- Adjacent task B: handle directly, no skill needed
+
+## What to know
+
+The judgment. Numbered steps, short tables, before-and-after pairs, whatever
+teaches best. Keep it to what a senior colleague would tell a new hire;
+leave the manual in its source and point at it.
+
+If the skill is short, everything goes here. If it grows, keep this section
+as the overview and move detail into files the body names:
+
+- See `references/topic.md` for [topic]
+- Run `scripts/do_thing.py` to [do the thing]
+
+## Examples
+
+Concrete input and output, or before and after. Use the agreed placeholder
+names, never a real customer or colleague, and never the people who were in
+the interview. Examples get copied, so make sure each one obeys every rule
+in the plugin, not only this skill's.
+
+## Notes
+
+Anything else: gotchas, related skills, what this skill deliberately leaves
+out. Optional.

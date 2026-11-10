@@ -1,0 +1,22 @@
+# Settings for the checker and the build. The shape is in Greenhorn's schema
+# reference, "The settings file".
+instruction-language: en
+placeholders: "Tulipware, Nordlicht Optics"
+# A real company lists its real customers, suppliers, and partners here,
+# so the checker fails if one ever slips into a skill. Parcelona is
+# fictional, so these two lines only show the shape.
+never-name:
+  - Real Shipper S.L.
+  - Real Haulier GmbH
+org-block-max: 3000
+# Who the plugin manifest names as its maker. The build refuses without it.
+plugin-author: "Parcelona Logistics"
+# What the plugin says about itself in the organisation's plugin list.
+# Without this line the build takes the README's first paragraph.
+plugin-description: "What Parcelona's assistant knows: who we are, how we write, our freight terms and reference numbers, how a shipment moves, who owns what, our look, and the AI house rules."
+
+# Written by Greenhorn's build script after every build; leave it alone.
+build-state:
+  version: 0.1.0
+  built: 2026-10-23
+  org-block-stamp: 815d7fd68b3ae439

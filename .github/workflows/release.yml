@@ -1,0 +1,175 @@
+name: Release
+
+# Pushing a tag like v0.2.0 builds the Greenhorn plugin zip and the
+# skill-only zip, writes their checksums, and publishes all three as a
+# GitHub Release whose notes name them and carry the generated change list.
+# The tag must match the version in .claude-plugin/plugin.json, which the
+# marketplace file mirrors, so a release can never ship a zip that calls
+# itself something else.
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build and publish the plugin zip
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.11"
+
+      - name: Run the checks
+        run: |
+          set -euo pipefail
+          python3 skills/greenhorn/scripts/check_harness.py --strict
+          python3 skills/greenhorn/scripts/check_harness.py --strict examples/parcelona
+          python3 skills/greenhorn/scripts/scan_secrets.py
+          python3 skills/greenhorn/scripts/build_plugin.py --self-test
+          python3 skills/greenhorn/scripts/init_repo.py --self-test
+
+      - name: Confirm the tag matches the manifest version
+        id: version
+        run: |
+          set -euo pipefail
+          tag="${GITHUB_REF_NAME}"
+          version="${tag#v}"
+          manifest="$(python3 -c 'import json; print(json.load(open(".claude-plugin/plugin.json"))["version"])')"
+          if [ "${version}" != "${manifest}" ]; then
+            echo "Tag ${tag} does not match plugin.json version ${manifest}. Bump the manifest (and marketplace.json) first, then re-tag." >&2
+            exit 1
+          fi
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
+          python3 - <<'PY'
+          import json, sys
+          plugin = json.load(open(".claude-plugin/plugin.json", encoding="utf-8"))
+          market = json.load(open(".claude-plugin/marketplace.json", encoding="utf-8"))
+          entries = [p for p in market["plugins"] if p["name"] == plugin["name"]]
+          if not entries or entries[0].get("version") != plugin["version"]:
+              sys.exit(f"marketplace.json does not list {plugin['name']} at version {plugin['version']}; update it before tagging")
+          sys.path.insert(0, "skills/greenhorn/scripts")
+          import check_harness as ch
+          data, _, _, _, err = ch.parse_frontmatter(open("skills/greenhorn/SKILL.md", encoding="utf-8").read())
+          if err or (data or {}).get("metadata", {}).get("version") != plugin["version"]:
+              sys.exit(f"skills/greenhorn/SKILL.md metadata.version does not match {plugin['version']}; update it before tagging")
+          print("manifest, marketplace, and skill agree")
+          PY
+
+      - name: Build the plugin zip
+        run: |
+          set -euo pipefail
+          version="${{ steps.version.outputs.version }}"
+          staging="staging/greenhorn"
+          if [ ! -d skills/greenhorn ]; then
+            echo "No skills/greenhorn folder; refusing to release a plugin with nothing in it." >&2
+            exit 1
+          fi
+          mkdir -p dist "${staging}"
+
+          # Only what the plugin needs at runtime goes in: the manifest, the
+          # skill (with its references, scripts, and template), the
+          # commands, the worked example, plus the licence files and the
+          # README. Nothing from .github, no local notes, and no marketplace
+          # file; the zip is a plugin, not a catalog.
+          mkdir -p "${staging}/.claude-plugin"
+          cp .claude-plugin/plugin.json "${staging}/.claude-plugin/"
+          for item in skills commands examples LICENSE NOTICE README.md; do
+            if [ -e "${item}" ]; then
+              cp -R "${item}" "${staging}/"
+            fi
+          done
+          find "${staging}" -name "__pycache__" -type d -prune -exec rm -rf {} +
+          find "${staging}" -name "dist" -type d -prune -exec rm -rf {} +
+          find "${staging}" -name ".DS_Store" -delete
+
+          if [ -d "${staging}/bin" ]; then
+            echo "A top-level bin/ folder makes claude.ai refuse the plugin; remove it." >&2
+            exit 1
+          fi
+          for needed in skills/greenhorn/SKILL.md skills/greenhorn/references/conventions.md skills/greenhorn/references/schema.md skills/greenhorn/templates/SKILL.md.template skills/greenhorn/templates/handout.template.md skills/greenhorn/references/working-with-ai-craft.md skills/greenhorn/scripts/build_plugin.py skills/greenhorn/scripts/init_repo.py; do
+            if [ ! -e "${staging}/${needed}" ]; then
+              echo "The staged plugin is missing ${needed}; the skill is not complete on its own." >&2
+              exit 1
+            fi
+          done
+
+          (cd staging && zip -r -X "../dist/greenhorn-v${version}.zip" greenhorn)
+
+          # The skill on its own, for people who run it in another tool or
+          # install it straight into a skills folder. Just the skill folder,
+          # which carries its references, scripts, and template, plus the
+          # licence and notice so every copy travels with them (Apache 2.0,
+          # section 4). Copied in after the plugin zip, so the plugin keeps
+          # its one copy at the root.
+          cp LICENSE NOTICE staging/greenhorn/skills/greenhorn/
+          (cd staging/greenhorn/skills && zip -r -X "../../../dist/greenhorn-skill-v${version}.zip" greenhorn)
+
+          (cd dist && sha256sum greenhorn-v${version}.zip greenhorn-skill-v${version}.zip > SHA256SUMS)
+          ls -la dist/
+          cat dist/SHA256SUMS
+          unzip -l "dist/greenhorn-v${version}.zip" | tail -n 5
+          unzip -l "dist/greenhorn-skill-v${version}.zip" | tail -n 5
+
+      - name: Write the release notes
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          tag="${GITHUB_REF_NAME}"
+          version="${{ steps.version.outputs.version }}"
+          {
+            case "${version}" in
+              0.*) echo "**Pre-release.** Greenhorn works end to end and is still finding its feet; the shape of the folder it builds may change before 1.0. Tell us what tripped you up in the issues."; echo ;;
+            esac
+            echo "## What's in this release"
+            echo
+            echo "| File | What it is |"
+            echo "| --- | --- |"
+            echo "| \`greenhorn-v${version}.zip\` | The plugin for Claude: upload it under your own plugins, never for the whole organisation. The skill, the commands, the Parcelona example, the licence files, and the README. |"
+            echo "| \`greenhorn-skill-v${version}.zip\` | Just the \`greenhorn/\` skill folder, complete on its own (licence files inside), for Claude Code without the plugin or for another tool that reads Agent Skills. |"
+            echo "| \`SHA256SUMS\` | Checksums of both zips, so you can tell the file you downloaded is the one we built. |"
+            echo
+            echo "Greenhorn is for you alone. What you build with it is a second, separate plugin, and that one goes to everyone."
+            echo
+            echo "To check a download: \`shasum -a 256 -c SHA256SUMS\` on a Mac or Linux, in the folder that holds the files."
+            echo
+            echo "## Changes"
+            echo
+            gh api "repos/${GITHUB_REPOSITORY}/releases/generate-notes" -f tag_name="${tag}" --jq .body
+          } > dist/RELEASE-NOTES.md
+          cat dist/RELEASE-NOTES.md
+
+      - name: Publish the GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          tag="${GITHUB_REF_NAME}"
+          version="${{ steps.version.outputs.version }}"
+          assets=("dist/greenhorn-v${version}.zip" "dist/greenhorn-skill-v${version}.zip" "dist/SHA256SUMS")
+          # While the version starts with 0, every release is a pre-release.
+          title="Greenhorn ${tag}"
+          flags=()
+          case "${version}" in
+            0.*) title="Greenhorn ${tag} (pre-release)"; flags+=(--prerelease) ;;
+          esac
+          if gh release view "${tag}" >/dev/null 2>&1; then
+            echo "Release ${tag} already exists; replacing its files and notes."
+            gh release upload "${tag}" "${assets[@]}" --clobber
+            gh release edit "${tag}" --title "${title}" --notes-file dist/RELEASE-NOTES.md "${flags[@]}"
+          else
+            gh release create "${tag}" \
+              --title "${title}" \
+              --notes-file dist/RELEASE-NOTES.md \
+              "${flags[@]}" \
+              "${assets[@]}"
+          fi

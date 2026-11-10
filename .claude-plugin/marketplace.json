@@ -1,0 +1,33 @@
+{
+  "name": "greenhorn",
+  "owner": {
+    "name": "GNX",
+    "url": "https://gnx.net"
+  },
+  "metadata": {
+    "description": "Greenhorn: onboard your company's AI assistant like a new colleague. One plugin, maintained by GNX."
+  },
+  "plugins": [
+    {
+      "name": "greenhorn",
+      "source": "./",
+      "version": "0.1.0",
+      "description": "Onboard your company's AI assistant the way you would a new colleague: an interview, a handful of skills, AI house rules, an always-on instruction block, checks, and a plugin you upload to your own organisation. Install Greenhorn for yourself only; the company plugin it builds is the one that goes org-wide.",
+      "author": {
+        "name": "GNX",
+        "url": "https://gnx.net"
+      },
+      "homepage": "https://github.com/globalnetx/greenhorn",
+      "repository": "https://github.com/globalnetx/greenhorn",
+      "license": "Apache-2.0",
+      "category": "productivity",
+      "keywords": [
+        "onboarding",
+        "skills",
+        "organisation",
+        "company-knowledge",
+        "plugin-builder"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,130 @@
+name: Checks
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: checks-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check-harness:
+    name: Check skills and folder contract (Python ${{ matrix.python }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # 3.9 is what the README promises; the newest keeps us honest.
+        python: ["3.9", "3.13"]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Check this repository (Greenhorn's own skill and commands)
+        run: python3 skills/greenhorn/scripts/check_harness.py --strict
+      - name: Check every example folder
+        run: |
+          set -euo pipefail
+          if compgen -G "examples/*/" > /dev/null; then
+            for folder in examples/*/; do
+              echo "== ${folder}"
+              python3 skills/greenhorn/scripts/check_harness.py --strict "${folder}"
+            done
+          else
+            echo "No examples yet."
+          fi
+      - name: Run the build script's self-test (the refusals)
+        run: python3 skills/greenhorn/scripts/build_plugin.py --self-test
+      - name: Run the repository script's self-test (refusals, ignore list, first commit)
+        run: python3 skills/greenhorn/scripts/init_repo.py --self-test
+      - name: The workflow homestead writes pins the same actions as this one
+        run: |
+          set -euo pipefail
+          for action in actions/checkout actions/setup-python; do
+            here="$(grep -o "${action}@[0-9a-f]\{40\}" .github/workflows/checks.yml | sort -u)"
+            there="$(grep -o "${action}@[0-9a-f]\{40\}" skills/greenhorn/scripts/init_repo.py | sort -u)"
+            if [ "${here}" != "${there}" ]; then
+              echo "init_repo.py pins ${there} but this workflow uses ${here}; update ACTION_* in init_repo.py so company repositories get the same version." >&2
+              exit 1
+            fi
+          done
+      - name: Build the Parcelona plugin and check exactly what went in
+        run: |
+          set -euo pipefail
+          work="$(mktemp -d)"
+          cp -R examples/parcelona "${work}/parcelona"
+          rm -rf "${work}/parcelona/dist"   # a local checkout may carry earlier builds
+          python3 skills/greenhorn/scripts/build_plugin.py --dry-run "${work}/parcelona"
+          python3 skills/greenhorn/scripts/build_plugin.py "${work}/parcelona" > "${work}/build.log"
+          zip_path="$(ls "${work}"/parcelona/dist/parcelona-v*.zip)"
+          echo "Built ${zip_path}"
+          python3 - "${zip_path}" <<'PY'
+          import sys, zipfile
+          from pathlib import Path
+          zip_path = sys.argv[1]
+          names = sorted(zipfile.ZipFile(zip_path).namelist())
+          expected = sorted(["parcelona/.claude-plugin/plugin.json"] + [
+              "parcelona/" + p.relative_to("examples/parcelona").as_posix()
+              for skill in sorted(Path("examples/parcelona/skills").iterdir()) if skill.is_dir() and skill.name.startswith("parcelona-")
+              for p in sorted(skill.rglob("*")) if p.is_file() and (p.name == "SKILL.md" or "references" in p.relative_to(skill).parts)
+          ])
+          skills = sorted({n.split("/")[2] for n in names if n.startswith("parcelona/skills/")})
+          if names != expected:
+              sys.exit(f"zip contents differ from the allowlist:\n  in zip only: {sorted(set(names) - set(expected))}\n  missing: {sorted(set(expected) - set(names))}")
+          if len(skills) != 12 or any(not s.startswith("parcelona-") for s in skills):
+              sys.exit(f"expected the twelve parcelona-* skills, found {skills}")
+          forbidden = [n for n in names if any(x in n for x in ("harness-profile", "HOUSE-RULES", "README", "harness.yaml", "sources", "greenhorn", "commands/"))]
+          if forbidden:
+              sys.exit(f"forbidden content in the zip: {forbidden}")
+          print(f"{len(names)} files: the manifest and the twelve parcelona-* skills, nothing else")
+          PY
+      - name: Check the plugin manifest, marketplace, and skill versions agree
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, sys
+          plugin = json.load(open(".claude-plugin/plugin.json", encoding="utf-8"))
+          market = json.load(open(".claude-plugin/marketplace.json", encoding="utf-8"))
+          entries = [p for p in market["plugins"] if p["name"] == plugin["name"]]
+          if not entries:
+              sys.exit(f"marketplace.json lists no plugin named {plugin['name']!r}")
+          if entries[0].get("version") != plugin["version"]:
+              sys.exit(f"version mismatch: plugin.json {plugin['version']} vs marketplace.json {entries[0].get('version')}")
+          sys.path.insert(0, "skills/greenhorn/scripts")
+          import check_harness as ch
+          data, _, _, _, err = ch.parse_frontmatter(open("skills/greenhorn/SKILL.md", encoding="utf-8").read())
+          skill_version = (data or {}).get("metadata", {}).get("version")
+          if err or skill_version != plugin["version"]:
+              sys.exit(f"version mismatch: plugin.json {plugin['version']} vs skills/greenhorn/SKILL.md metadata.version {skill_version}")
+          print(f"{plugin['name']} {plugin['version']}: manifest, marketplace, and skill agree")
+          PY
+
+  markdown-lint:
+    name: Markdown lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: DavidAnson/markdownlint-cli2-action@21c1be1b93ad9ed58fa840aacc3f279cde2a72ff # v24.2.0
+        with:
+          globs: |
+            **/*.md
+            !**/references/**
+            !node_modules/**
+
+  secret-scan:
+    name: Secret scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.11"
+      - name: Run the secret scanner
+        run: python3 skills/greenhorn/scripts/scan_secrets.py

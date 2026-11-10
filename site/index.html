@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Greenhorn</title>
+<meta name="description" content="Greenhorn onboards your company's AI the way you would a new colleague. A free, open-source plugin for Claude, by the team at GNX.">
+<meta property="og:title" content="Greenhorn">
+<meta property="og:description" content="The new hire that actually reads the company handbook. Onboard your AI the way you would any new colleague.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://globalnetx.github.io/greenhorn/">
+<meta property="og:image" content="https://globalnetx.github.io/greenhorn/assets/banner.png">
+<meta property="og:image:width" content="1280">
+<meta property="og:image:height" content="640">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="assets/mascot/icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Caveat:wght@600&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --sprout: #5BAA4F; --green: #2E7337; --saddle: #C27B3E; --gold: #F2C14E;
+    --pink: #F2A7A0; --barn: #D2463A; --ink: #2A241D; --paper: #F6F1E4;
+    --paper-2: #EFE7D3; --card: #E6EFD9; --muted: #6B6158; --line: #D9CFB8;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font-family: "DM Sans", system-ui, sans-serif; font-size: 18px; line-height: 1.55; }
+  img.px { image-rendering: pixelated; image-rendering: crisp-edges; }
+  a { color: var(--green); }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
+  .mono { font-family: "DM Mono", ui-monospace, monospace; }
+  .hand { font-family: "Caveat", cursive; font-weight: 600; }
+  .slab { font-family: "Alfa Slab One", Georgia, serif; font-weight: 400; }
+  .eyebrow { font-family: "DM Mono", monospace; text-transform: uppercase; letter-spacing: .12em; font-size: 13px; color: var(--saddle); }
+
+  header { padding: 18px 0; }
+  header .wrap { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+  header img { height: 34px; width: auto; }
+  nav a { margin-left: 22px; text-decoration: none; color: var(--ink); font-weight: 500; }
+  nav a:hover { color: var(--green); }
+
+  .hero { padding: 36px 0 0; }
+  .hero .wrap { display: grid; grid-template-columns: 1.3fr 1fr; gap: 32px; align-items: end; }
+  .hero h1 { margin: 10px 0 6px; font-size: clamp(42px, 7vw, 84px); line-height: .95; letter-spacing: -.01em; }
+  .hero h1 .g { color: var(--green); }
+  .hero .def { font-family: "DM Mono", monospace; font-size: 14px; color: var(--muted); margin: 0 0 18px; }
+  .hero h2 { font-size: clamp(24px, 3.2vw, 36px); line-height: 1.15; margin: 0 0 12px; font-weight: 700; }
+  .hero p.sub { font-size: 20px; color: var(--muted); margin: 0 0 20px; max-width: 34ch; }
+  .pills { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 26px; }
+  .pill { font-family: "DM Mono", monospace; font-size: 14px; padding: 8px 14px; border: 2px solid var(--ink); border-radius: 999px; background: #fff; }
+  .pill.gold { background: var(--gold); }
+  .status { font-size: 16px; color: var(--ink); background: #fff; border: 2px dashed var(--saddle); border-radius: 10px; padding: 10px 14px; margin: 0 0 18px; max-width: 46ch; }
+  .cta { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; }
+  .btn { display: inline-block; padding: 12px 20px; border-radius: 10px; text-decoration: none; font-weight: 700; border: 2px solid var(--ink); }
+  .btn.primary { background: var(--green); color: #fff; border-color: var(--green); }
+  .btn.ghost { background: #fff; color: var(--ink); }
+  .mascot { position: relative; z-index: 3; text-align: center; }
+  .mascot img { width: 100%; max-width: 300px; height: auto; }
+  .bubble { position: absolute; z-index: 1; top: -26px; right: -3%; background: #fff; border: 2px solid var(--ink); border-radius: 12px; padding: 8px 14px; font-size: 24px; transform: rotate(-4deg); }
+  .bubble::after { content: ""; position: absolute; left: 24px; bottom: -12px; border: 6px solid transparent; border-top-color: var(--ink); }
+  .hero .wrap { position: relative; z-index: 2; }
+  .hero .wrap > div:first-child { padding-bottom: 104px; }
+  .ranch { position: relative; z-index: 1; height: 160px; margin-top: -110px; pointer-events: none; }
+  .ranch .grass { position: absolute; left: 0; right: 0; bottom: 0; height: 56px; background: var(--card); border-top: 3px solid var(--ink); }
+  .ranch .rail { position: absolute; left: 0; right: 0; bottom: 53px; height: 60px; background: url(assets/scene/fence.svg) repeat-x left bottom / 96px 60px; z-index: 2; }
+  .ranch .cow { position: absolute; bottom: 80px; width: 65px; height: auto; z-index: 1; }
+  .ranch .cow.c1 { left: calc(50% - 510px); }
+  .ranch .cow.c2 { left: calc(50% - 280px); transform: scaleX(-1); }
+  .ranch .cow.c3 { left: calc(50% - 70px); }
+  .ranch .barn { position: absolute; right: 2vw; bottom: 53px; width: 138px; height: auto; z-index: 3; display: none; }
+  @media (min-width: 1240px) { .ranch .barn { display: block; } }
+
+  section { padding: 64px 0; }
+  section.alt { background: var(--paper-2); }
+  h2.title { font-size: clamp(28px, 3.6vw, 40px); margin: 0 0 8px; }
+  p.lead { font-size: 20px; color: var(--muted); max-width: 60ch; margin: 0 0 28px; }
+  .morning { font-size: clamp(26px, 3vw, 34px); margin: 0 0 20px; }
+  ul.asks { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; }
+  ul.asks li { background: #fff; border: 2px solid var(--line); border-radius: 12px; padding: 16px 18px; }
+  ul.asks li b { color: var(--green); }
+
+  .poses { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; }
+  .pose { background: var(--card); border: 2px solid var(--ink); border-radius: 18px; padding: 18px 16px 14px; text-align: center; position: relative; }
+  .pose .say { display: inline-block; background: #fff; border: 2px solid var(--ink); border-radius: 10px; padding: 4px 12px; font-size: 22px; margin-bottom: 10px; transform: rotate(-2deg); }
+  .pose img { height: 150px; width: auto; display: block; margin: 0 auto 12px; }
+  .pose h3 { margin: 0 0 4px; font-size: 20px; }
+  .pose p { margin: 0; color: var(--muted); font-size: 16px; }
+
+  ol.steps { counter-reset: s; list-style: none; padding: 0; margin: 0 0 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px; }
+  ol.steps li { counter-increment: s; background: #fff; border: 2px solid var(--line); border-radius: 14px; padding: 22px 20px 20px 64px; position: relative; }
+  ol.steps li::before { content: counter(s); position: absolute; left: 18px; top: 18px; width: 32px; height: 32px; border-radius: 50%; background: var(--gold); border: 2px solid var(--ink); display: grid; place-items: center; font-family: "Alfa Slab One", serif; }
+  code { font-family: "DM Mono", monospace; background: #fff; border: 1px solid var(--line); border-radius: 6px; padding: 2px 7px; font-size: .92em; }
+
+  .cmds { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 16px; }
+  .cmd { background: #fff; border: 2px solid var(--line); border-radius: 14px; padding: 18px; display: grid; grid-template-columns: 56px 1fr; gap: 14px; align-items: start; }
+  .cmd .ic { width: 56px; height: 56px; border-radius: 12px; background: var(--card); border: 2px solid var(--ink); display: grid; place-items: center; }
+  .cmd .ic img { width: 36px; height: auto; }
+  .cmd h3 { margin: 0 0 4px; font-family: "DM Mono", monospace; font-size: 16px; font-weight: 500; }
+  .cmd p { margin: 0 0 6px; font-size: 16px; }
+  .cmd .say { font-size: 15px; color: var(--muted); }
+  .note { font-size: 16px; color: var(--muted); margin-top: 18px; }
+
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 10px; }
+  .card { border: 2px solid var(--ink); border-radius: 16px; padding: 22px; background: #fff; }
+  .card.you { background: var(--gold); }
+  .card.team { background: var(--green); color: #fff; }
+  .card h3 { margin: 0 0 8px; font-size: 22px; }
+  .card .tag { font-family: "DM Mono", monospace; font-size: 13px; text-transform: uppercase; letter-spacing: .1em; opacity: .8; }
+  .card img { width: 48px; height: auto; float: right; margin-left: 12px; }
+
+  section.stickers { background: var(--ink); color: var(--paper); padding-bottom: 56px; }
+  .stickers .eyebrow { color: var(--gold); }
+  .stickers p.lead { color: #D9CFB8; }
+  .stickers a { color: var(--gold); }
+  .wall { display: grid; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); gap: 40px 30px; align-items: center; justify-items: center; margin: 34px 0 30px; }
+  .stk { width: 100%; max-width: 310px; background: #FFFDF8; color: var(--ink); border: 3px solid var(--ink); border-radius: 20px; box-shadow: 0 0 0 6px #fff; overflow: hidden; line-height: 1.15; }
+  .stk.t1 { transform: rotate(-3deg); } .stk.t2 { transform: rotate(2deg); } .stk.t3 { transform: rotate(-1.5deg); }
+  .stk.t4 { transform: rotate(1deg); } .stk.t5 { transform: rotate(-2deg); } .stk.t6 { transform: rotate(4deg); }
+  .stk .big { font-family: "Alfa Slab One", Georgia, serif; font-size: 26px; }
+  .stk .hw { font-family: "Caveat", cursive; font-weight: 600; font-size: 24px; }
+  .stk.hello .top { background: var(--green); color: #fff; text-align: center; padding: 10px 10px 8px; font-family: "Alfa Slab One", serif; font-size: 30px; letter-spacing: .04em; }
+  .stk.hello .top small { display: block; font-family: "DM Mono", monospace; font-size: 11px; letter-spacing: .25em; margin-top: 2px; }
+  .stk.hello .name { font-family: "Caveat", cursive; font-weight: 600; font-size: 46px; text-align: center; padding: 10px 0 0; }
+  .stk.hello .fine { font-family: "DM Mono", monospace; font-size: 11px; text-align: center; color: var(--muted); padding: 2px 0 14px; }
+  .stk.pair { display: grid; grid-template-columns: 84px 1fr; gap: 14px; align-items: center; padding: 20px 18px; }
+  .stk.pair img { width: 84px; height: auto; }
+  .stk.gold { background: var(--gold); }
+  .stk.hat .hw { color: var(--green); }
+  .stk.note { padding: 14px 18px 14px 46px; position: relative; background: repeating-linear-gradient(#FFFDF8 0 33px, #C9D6EA 33px 34px); }
+  .stk.note::before { content: ""; position: absolute; top: 0; bottom: 0; left: 32px; width: 2px; background: var(--barn); }
+  .stk.note .hw { display: block; font-size: 25px; line-height: 34px; }
+  .stk.round { width: 236px; height: 236px; border-radius: 50%; background: var(--card); display: grid; place-content: center; justify-items: center; text-align: center; padding: 18px; }
+  .stk.round img { width: 58px; height: auto; margin-bottom: 6px; }
+  .stk.round .big { font-size: 22px; }
+  .stk.round .hw { color: var(--green); font-size: 28px; }
+  .stk.cert { background: var(--green); color: var(--paper); text-align: center; padding: 8px; }
+  .stk.cert .in { border: 2px dashed var(--paper); border-radius: 12px; padding: 14px 10px 12px; }
+  .stk.cert small { font-family: "DM Mono", monospace; font-size: 12px; letter-spacing: .25em; }
+  .stk.cert .big { font-size: 30px; display: block; }
+
+  footer { padding: 0 0 60px; margin-top: -1px; background: var(--ink); color: var(--paper); }
+  footer a { color: var(--gold); }
+  footer .wrap { border-top: 2px solid #4A4137; padding-top: 36px; }
+  footer img.logo { height: 40px; width: auto; margin-bottom: 14px; }
+  footer p { margin: 0 0 12px; font-size: 16px; color: #D9CFB8; max-width: 78ch; }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .mascot img { animation: hop 5s ease-in-out infinite; }
+    .bubble { animation: sway 5s ease-in-out infinite; }
+    .ranch .cow { animation: peek 7s ease-in-out infinite; }
+    .ranch .cow.c2 { animation-name: peek-flip; animation-delay: -2.5s; }
+    .ranch .cow.c3 { animation-delay: -4.5s; }
+    .pose, .stk, .cmd .ic, .pill, .btn { transition: transform .18s ease; }
+    .pose:hover { transform: translateY(-5px) rotate(-1deg); }
+    .stk:hover { transform: rotate(0) scale(1.05); }
+    .cmd:hover .ic { transform: rotate(-8deg) scale(1.1); }
+    .pill:hover { transform: rotate(-2deg); }
+    .btn:hover { transform: translateY(-2px); }
+    @keyframes hop { 0%, 84%, 100% { transform: translateY(0); } 90% { transform: translateY(-10px); } 95% { transform: translateY(0); } 97% { transform: translateY(-4px); } }
+    @keyframes sway { 0%, 100% { transform: rotate(-4deg); } 50% { transform: rotate(-1deg); } }
+    @keyframes peek { 0%, 55%, 100% { transform: translateY(0); } 70%, 85% { transform: translateY(22px); } }
+    @keyframes peek-flip { 0%, 55%, 100% { transform: scaleX(-1) translateY(0); } 70%, 85% { transform: scaleX(-1) translateY(22px); } }
+  }
+
+  @media (max-width: 820px) {
+    .hero .wrap, .two { grid-template-columns: 1fr; }
+    .ranch .cow.c1 { left: 6%; } .ranch .cow.c2 { left: 44%; } .ranch .cow.c3 { left: auto; right: 6%; }
+    .mascot { order: -1; }
+    .mascot img { max-width: 220px; }
+    .bubble { font-size: 20px; }
+    nav a { margin-left: 14px; font-size: 15px; }
+    section { padding: 48px 0; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <a href="#top" aria-label="Greenhorn home"><img src="assets/logo.png" alt="greenhorn"></a>
+    <nav>
+      <a href="#start">Get started</a>
+      <a href="#commands">Commands</a>
+      <a href="https://github.com/globalnetx/greenhorn">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+  <div class="hero">
+    <div class="wrap">
+      <div>
+        <div class="eyebrow">A free plugin for Claude · by the team at GNX</div>
+        <h1 class="slab"><span class="g">green</span>horn</h1>
+        <p class="def">green·horn /ˈɡriːnˌhɔːrn/ <i>noun</i> · a newcomer who doesn't know the ropes yet</p>
+        <h2>The new hire that actually reads the company handbook.</h2>
+        <p class="sub">Teach it the ropes. Answer its questions. Onboard your AI the way you would any new colleague.</p>
+        <div class="pills">
+          <span class="pill">open source</span>
+          <span class="pill">no Git, no devs</span>
+          <span class="pill gold">asks a lot of questions</span>
+        </div>
+        <p class="status"><b>Pre-release, version 0.1.</b> Greenhorn works end to end, and it will still surprise you in places. Try it, and tell us what tripped you up.</p>
+        <div class="cta">
+          <a class="btn primary" href="https://github.com/globalnetx/greenhorn#installing-greenhorn">Install it</a>
+          <a class="btn ghost" href="https://github.com/globalnetx/greenhorn">Source on GitHub</a>
+        </div>
+      </div>
+      <div class="mascot">
+        <div class="bubble hand">moo-rning, team!</div>
+        <img class="px" src="assets/mascot/greenhorn.svg" alt="Greenhorn, a pixel-art cow in an oversized cowboy hat with a green sprout for a horn, holding a clipboard and waving.">
+      </div>
+    </div>
+  </div>
+  <div class="ranch" aria-hidden="true">
+    <img class="px cow c1" src="assets/scene/cow-peek.svg" alt="">
+    <img class="px cow c2" src="assets/scene/cow-peek.svg" alt="">
+    <img class="px cow c3" src="assets/scene/cow-peek.svg" alt="">
+    <div class="rail"></div>
+    <img class="px barn" src="assets/scene/barn.svg" alt="">
+    <div class="grass"></div>
+  </div>
+
+  <section>
+    <div class="wrap">
+      <h2 class="title">Your team already has an AI. Greenhorn teaches it your company.</h2>
+      <p class="lead">Your AI assistant is very smart, but it has never heard of your organisation. A new colleague has the same problem on their first day, and you fix that by showing them around. Greenhorn does exactly that for your AI. You sit down with it for an afternoon. It reads your website, looks at the documents you already have, and asks the kind of questions a curious new hire would ask. Then it writes it all down and packages it up for your whole team.</p>
+      <p class="morning slab">The next morning, your AI knows your company.</p>
+      <ul class="asks">
+        <li><b>Ask it to write a customer email</b>, and it sounds like you.</li>
+        <li><b>Ask it for a slide deck or a one-pager</b>, and it uses your logo, your colours, and your fonts.</li>
+        <li><b>Ask what one of your terms means</b>, and it knows.</li>
+        <li><b>Ask who handles something</b>, and it tells you who, and who to go to next.</li>
+        <li><b>Ask it to do something you've decided AI shouldn't do here</b>, and it says so.</li>
+        <li><b>Everyone gets the same answers</b>, because it all comes from one place.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="alt">
+    <div class="wrap">
+      <div class="eyebrow">Greenhorn at work · a colleague, not a pet</div>
+      <h2 class="title">Hat's one size too big. Growing into it.</h2>
+      <div class="poses">
+        <div class="pose">
+          <span class="say hand">hi! I'm new here</span>
+          <img class="px" src="assets/poses/day-one.svg" alt="">
+          <h3>Day one</h3><p>Hat too big. Clipboard ready. Waving at everyone.</p>
+        </div>
+        <div class="pose">
+          <span class="say hand">moo-re questions!</span>
+          <img class="px" src="assets/poses/has-a-question.svg" alt="">
+          <h3>Has a question</h3><p>Has several, actually. Writes the answers down.</p>
+        </div>
+        <div class="pose">
+          <span class="say hand">moo-rning, team!</span>
+          <img class="px" src="assets/poses/first-stand-up.svg" alt="">
+          <h3>First stand-up</h3><p>Brought a mug. Listens more than talks.</p>
+        </div>
+        <div class="pose">
+          <span class="say hand">got this</span>
+          <img class="px" src="assets/poses/week-twelve.svg" alt="">
+          <h3>Week twelve</h3><p>Hat fits. Sprout grew. Udderly up to speed.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="start">
+    <div class="wrap">
+      <h2 class="title">Getting started</h2>
+      <p class="lead">Three steps. After that, your AI takes you by the hand.</p>
+      <ol class="steps">
+        <li><b>Install Greenhorn</b>, for yourself only. Not for the whole organisation. <a href="https://github.com/globalnetx/greenhorn#installing-greenhorn">Here's how.</a></li>
+        <li><b>Make an empty folder</b> somewhere. Open it in the Code tab of Claude Desktop.</li>
+        <li><b>Type</b> <code>/greenhorn:giddy-up</code>. From there it's a conversation. It asks, you answer, it writes things down, and then it tells you in plain words what it wrote.</li>
+      </ol>
+      <p class="note">You'll need Claude Desktop with the Code tab, Python 3.9 or newer, permission to set shared instructions for your team's AI, your website address, and whatever you've got lying around: a brand guide, a handbook, a few emails you're proud of. No need to know your colour codes or font names. Greenhorn works those out with you.</p>
+    </div>
+  </section>
+
+  <section class="alt" id="commands">
+    <div class="wrap">
+      <div class="eyebrow">The tack room · one icon per command</div>
+      <h2 class="title">Greenhorn speaks ranch.</h2>
+      <p class="lead">Every command starts with <code>greenhorn:</code> because that's how Claude Code shows commands from a plugin. You don't have to remember any of them. Say what you want and the right one runs.</p>
+      <div class="cmds">
+        <div class="cmd"><div class="ic"><img class="px" src="assets/icons/giddy-up.svg" alt=""></div><div><h3>/greenhorn:giddy-up</h3><p>The first run. Reads your website, takes your documents, interviews you, builds the first version.</p><div class="say">Or just say: "set up our assistant"</div></div></div>
+        <div class="cmd"><div class="ic"><img class="px" src="assets/icons/wrangle.svg" alt=""></div><div><h3>/greenhorn:wrangle</h3><p>Adds a skill, or fixes one. A lesson, a document, or "it keeps getting X wrong" goes in; a skill comes out.</p><div class="say">Or just say: "add a skill", "capture this"</div></div></div>
+        <div class="cmd"><div class="ic"><img class="px" src="assets/icons/reins.svg" alt=""></div><div><h3>/greenhorn:reins</h3><p>Tidies up the routing: the always-on block, and the table of which skill to open for what. Runs by itself after a skill is added.</p><div class="say">Or just say: "it isn't using the glossary"</div></div></div>
+        <div class="cmd"><div class="ic"><img class="px" src="assets/icons/round-up.svg" alt=""></div><div><h3>/greenhorn:round-up</h3><p>Checks the folder: broken pointers, overlapping skills, stale references, claims with no source. Also runs before every build.</p><div class="say">Or just say: "check everything", "anything stale?"</div></div></div>
+        <div class="cmd"><div class="ic"><img class="px" src="assets/icons/roll-out.svg" alt=""></div><div><h3>/greenhorn:roll-out</h3><p>Packs everything up for your team's AI (a plugin, for Claude) and tells you exactly how to get it to them.</p><div class="say">Or just say: "publish this", "push it to the team"</div></div></div>
+        <div class="cmd"><div class="ic"><img class="px" src="assets/icons/campfire.svg" alt=""></div><div><h3>/greenhorn:campfire</h3><p>Tells your team about their new colleague, in the form you want: an email, a post in your channel, a short note, or a handout. In your voice, with your own examples, and a named person to ask.</p><div class="say">Or just say: "announce it to the team"</div></div></div>
+        <div class="cmd"><div class="ic"><img class="px" src="assets/icons/homestead.svg" alt=""></div><div><h3>/greenhorn:homestead</h3><p>Optional, for later. Puts the folder under version control so a colleague can help maintain it.</p><div class="say">Or just say: "put this on GitHub"</div></div></div>
+      </div>
+      <p class="note">The first run is the interview plus every other command, once. Your AI tells you that too, so you know the others are there.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <h2 class="title">Two plugins, never one.</h2>
+      <p class="lead">This is the one thing to get right, so let's do it now.</p>
+      <div class="two">
+        <div class="card you">
+          <img class="px" src="assets/mascot/icon.svg" alt="">
+          <div class="tag">For you alone</div>
+          <h3>Greenhorn</h3>
+          <p>The tool that builds your company's plugin. Install it under your own plugins. Never for the whole organisation.</p>
+        </div>
+        <div class="card team">
+          <img class="px" src="assets/mascot/icon-dark.svg" alt="">
+          <div class="tag">For everyone</div>
+          <h3>Your company's plugin</h3>
+          <p>Built by Greenhorn, with only your company's skills and rules inside. Nothing of Greenhorn itself goes in there. The build step checks.</p>
+        </div>
+      </div>
+      <p class="note">Install Greenhorn company-wide and every colleague gets a tool for building plugins, instead of a colleague who knows the company. Greenhorn says this once, when it hands you the zip to upload.</p>
+    </div>
+  </section>
+  <section class="stickers">
+    <div class="wrap">
+      <div class="eyebrow">Die-cut · white border on print</div>
+      <h2 class="title">Laptop stickers.</h2>
+      <p class="lead">Every new hire gets a name badge. This one would like six.</p>
+      <div class="wall">
+        <div class="stk hello t1">
+          <div class="top">HELLO<small>MY NAME IS</small></div>
+          <div class="name">Greenhorn</div>
+          <div class="fine">(an AI. not a person. very eager.)</div>
+        </div>
+        <div class="stk pair gold t2">
+          <img class="px" src="assets/mascot/greenhorn-head.svg" alt="">
+          <div><span class="big">I have questions.</span><br><span class="hw">(so many)</span></div>
+        </div>
+        <div class="stk note t3">
+          <span class="hw">Day 1 notes:</span>
+          <span class="hw">– who to ask for what</span>
+          <span class="hw">– what's allowed with AI</span>
+          <span class="hw">– where's the coffee??</span>
+        </div>
+        <div class="stk round t4">
+          <img class="px" src="assets/icons/wrangle.svg" alt="">
+          <span class="big">Doesn't know the ropes.</span>
+          <span class="hw">yet.</span>
+        </div>
+        <div class="stk pair hat t5">
+          <img class="px" src="assets/mascot/greenhorn.svg" alt="">
+          <div><span class="big">Hat's one size too big.</span><br><span class="hw">growing into it.</span></div>
+        </div>
+        <div class="stk cert t6">
+          <div class="in"><small>CERTIFIED</small><span class="big">RANCH HAND*</span><span class="hw">*after onboarding</span></div>
+        </div>
+      </div>
+      <p class="note" style="color:#D9CFB8">Want them on a real laptop? The artwork is in the <a href="https://github.com/globalnetx/greenhorn/tree/main/.github/assets/brand-kit">brand kit</a>.</p>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <img class="logo" src="assets/logo-dark.png" alt="greenhorn">
+      <p>We didn't invent any of this. Greenhorn is a bundle of habits we picked up at <a href="https://gnx.net">GNX</a> while getting our own AI to work for us. Write down what a good colleague would know. Keep each rule in one place. Check it before it goes out. Tell people how to use it. What we've done is put it all in one package that does the work with you.</p>
+      <p>Open source under the Apache 2.0 licence. <a href="https://github.com/globalnetx/greenhorn">Source, releases, and issues on GitHub.</a> Built with AI, on purpose: designed by people, written together with Claude, tried for real. The worked example, Parcelona Logistics, is made up, and so are its customers Tulipware and Nordlicht Optics.</p>
+  </div>
+</footer>
+
+</body>
+</html>
